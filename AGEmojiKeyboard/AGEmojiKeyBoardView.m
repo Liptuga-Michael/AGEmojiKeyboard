@@ -27,6 +27,9 @@ NSString *const RecentUsedEmojiCharactersKey = @"RecentUsedEmojiCharactersKey";
 @property (nonatomic) NSMutableArray *pageViews;
 @property (nonatomic) NSString *category;
 
+@property (nonatomic, strong) NSMutableArray *buttonsArray;
+@property (nonatomic, strong) NSMutableArray *categoryList;
+
 @end
 
 @implementation AGEmojiKeyboardView
@@ -41,9 +44,29 @@ NSString *const RecentUsedEmojiCharactersKey = @"RecentUsedEmojiCharactersKey";
   return _emojis;
 }
 
+- (NSMutableArray*) buttonsArray {
+    if (!_buttonsArray) {
+        _buttonsArray = [[NSMutableArray alloc] init];
+    }
+    return _buttonsArray;
+}
+
+- (NSMutableArray) categoryList {
+    if (!_categoryList) {
+        _categoryList = [[NSMutableArray alloc] init];
+        [_categoryList addObject : segmentRecentName];
+        [_categoryList addObject : @"People"];
+        [_categoryList addObject : @"Objects"];
+        [_categoryList addObject : @"Nature"];
+        [_categoryList addObject : @"Places"];
+        [_categoryList addObject : @"Symbols"];
+    }
+    return _categoryList;
+}
+
 - (NSString *)categoryNameAtIndex:(NSUInteger)index {
-  NSArray *categoryList = @[segmentRecentName, @"People", @"Objects", @"Nature", @"Places", @"Symbols"];
-  return categoryList[index];
+//  NSArray *categoryList = @[segmentRecentName, @"People", @"Objects", @"Nature", @"Places", @"Symbols"];
+  return self.categoryList[index];
 }
 
 - (AGEmojiKeyboardViewCategoryImage)defaultSelectedCategory {
@@ -118,6 +141,12 @@ NSString *const RecentUsedEmojiCharactersKey = @"RecentUsedEmojiCharactersKey";
 
     self.category = [self categoryNameAtIndex:self.defaultSelectedCategory];
 
+      for (int i = 0; i < self.categoryList.count; i++) {
+          [self addSubview : [self p_createCustomButtonAtIndex : i]];
+          
+      }
+      
+      
     self.segmentsBar = [[UISegmentedControl alloc] initWithItems:self.imagesForSelectedSegments];
     self.segmentsBar.frame = CGRectMake(0,
                                         0,
@@ -131,7 +160,7 @@ NSString *const RecentUsedEmojiCharactersKey = @"RecentUsedEmojiCharactersKey";
     [self setSelectedCategoryImageInSegmentControl:self.segmentsBar
                                            atIndex:self.defaultSelectedCategory];
     self.segmentsBar.selectedSegmentIndex = self.defaultSelectedCategory;
-    [self addSubview:self.segmentsBar];
+//    [self addSubview:self.segmentsBar];
 
     self.pageControl = [[UIPageControl alloc] init];
     self.pageControl.hidesForSinglePage = YES;
@@ -167,6 +196,23 @@ NSString *const RecentUsedEmojiCharactersKey = @"RecentUsedEmojiCharactersKey";
     [self addSubview:self.emojiPagesScrollView];
   }
   return self;
+}
+
+- (UIButton*) p_createCustomButtonAtIndex : (NSInteger) index {
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    CGFloat buttonWidth = [UIScreen mainScreen].bounds.frame.width / self.categoryList.count;
+    [button setFrame: CGRectMake (index * buttonWidth, 0, buttonWidth, 25.0)];
+    [button setTag:tag];
+    button.backgroundColor = [UIColor redColor];
+//    [button setTitleColor:Title_DefaultColor forState:UIControlStateNormal];
+//    [button setTitle:title forState:UIControlStateNormal];
+//    [button.titleLabel setFont:[UIFont fontWithName: mavenProMedium size: 15.f]];
+//    [button.titleLabel setTextAlignment:NSTextAlignmentCenter];
+//    button.titleEdgeInsets = UIEdgeInsetsMake(6, 0.f, -6.f, 0.f);
+    [button addTarget:self action:@selector(buttonClicked:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [_buttonsArray addObject:button];
+    return button;
 }
 
 - (void)layoutSubviews {
